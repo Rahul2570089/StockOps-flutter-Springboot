@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:newsapp/Models/user.dart';
 import 'package:http/http.dart' as http;
 import 'package:newsapp/auth/config.dart';
-import 'package:newsapp/localdata/sharedpreferences.dart';
 
 class UserController {
   static Future<User> createUser(String email, String password) async {

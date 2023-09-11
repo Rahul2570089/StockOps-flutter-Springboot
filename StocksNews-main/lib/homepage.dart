@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:newsapp/Stockslist/bse.dart';
 import 'package:newsapp/News/news.dart';
 import 'package:newsapp/Watchlist/BSE_watchlist.dart';
 import 'package:newsapp/auth/createuser_page.dart';
-import 'package:newsapp/controllers/usercontroller.dart';
 import 'package:newsapp/controllers/bse_controller.dart';
 import 'package:newsapp/controllers/nse_controller.dart';
 import 'package:newsapp/localdata/sharedpreferences.dart';

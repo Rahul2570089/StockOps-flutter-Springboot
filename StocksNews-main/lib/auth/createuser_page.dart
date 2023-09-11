@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:newsapp/auth/loginuser_page.dart';
 import 'package:newsapp/controllers/usercontroller.dart';
 import 'package:newsapp/homepage.dart';
-import 'package:newsapp/localdata/sharedpreferences.dart';
 
 class CreateUserPage extends StatefulWidget {
   const CreateUserPage({Key? key}) : super(key: key);
