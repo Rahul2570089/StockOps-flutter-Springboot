@@ -12,13 +12,23 @@ class UserController {
         "password": password,
       };
 
-      var response = await http.post(Uri.parse("${url}create"),
+      var response = await http.post(Uri.parse("${url}users/create"),
           headers: {"Content-Type": "application/json"},
           body: jsonEncode(user));
-
       var jsonResponse = jsonDecode(response.body.toString());
-      print(jsonResponse);
       if (jsonResponse['id'] != null) {
+        // var response2 = await http.get(
+        //   Uri.parse(
+        //       "${url}users/session/create/${jsonResponse['id']}/${jsonResponse['email']}/${jsonResponse['password']}"),
+        //   headers: {"Content-Type": "application/json"},
+        // );
+        // var jsonResponse2 = jsonDecode(response2.body.toString());
+        // if (jsonResponse2 != null) {
+        //   return User(jsonResponse['email'], jsonResponse['password'],
+        //       jsonResponse['id']);
+        // } else {
+        //   return User(null, null, null);
+        // }
         return User(jsonResponse['email'], jsonResponse['password'],
             jsonResponse['id']);
       } else {
@@ -32,7 +42,7 @@ class UserController {
   static Future<User> loginUser(String email, String password) async {
     try {
       var response = await http.get(
-        Uri.parse("${url}allusers"),
+        Uri.parse("${url}users/allusers"),
         headers: {"Content-Type": "application/json"},
       );
       var jsonResponse = jsonDecode(response.body.toString());
@@ -40,7 +50,18 @@ class UserController {
         List<dynamic> users = jsonResponse;
         for (var element in users) {
           if (element['email'] == email && element['password'] == password) {
-            return User.fromJson(element);
+            var response2 = await http.get(
+              Uri.parse(
+                  "${url}session/create/${jsonResponse['id']}/${jsonResponse['email']}/${jsonResponse['password']}"),
+              headers: {"Content-Type": "application/json"},
+            );
+            var jsonResponse2 = jsonDecode(response2.body.toString());
+            if (jsonResponse2 != null) {
+              return User(jsonResponse['email'], jsonResponse['password'],
+                  jsonResponse['id']);
+            } else {
+              return User(null, null, null);
+            }
           }
         }
         return User(null, null, null);
