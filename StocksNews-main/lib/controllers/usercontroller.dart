@@ -17,20 +17,18 @@ class UserController {
           body: jsonEncode(user));
       var jsonResponse = jsonDecode(response.body.toString());
       if (jsonResponse['id'] != null) {
-        // var response2 = await http.get(
-        //   Uri.parse(
-        //       "${url}users/session/create/${jsonResponse['id']}/${jsonResponse['email']}/${jsonResponse['password']}"),
-        //   headers: {"Content-Type": "application/json"},
-        // );
-        // var jsonResponse2 = jsonDecode(response2.body.toString());
-        // if (jsonResponse2 != null) {
-        //   return User(jsonResponse['email'], jsonResponse['password'],
-        //       jsonResponse['id']);
-        // } else {
-        //   return User(null, null, null);
-        // }
-        return User(jsonResponse['email'], jsonResponse['password'],
-            jsonResponse['id']);
+        var response2 = await http.get(
+          Uri.parse(
+              "$url/users/session/create/${jsonResponse['id']}/${jsonResponse['email']}/${jsonResponse['password']}"),
+          headers: {"Content-Type": "application/json"},
+        );
+        var jsonResponse2 = jsonDecode(response2.body.toString());
+        if (jsonResponse2 != null) {
+          return User(jsonResponse['email'], jsonResponse['password'],
+              jsonResponse['id']);
+        } else {
+          return User(null, null, null);
+        }
       } else {
         return User(null, null, null);
       }
@@ -42,7 +40,7 @@ class UserController {
   static Future<User> loginUser(String email, String password) async {
     try {
       var response = await http.get(
-        Uri.parse("${url}users/allusers"),
+        Uri.parse("$url/api/users/allusers"),
         headers: {"Content-Type": "application/json"},
       );
       var jsonResponse = jsonDecode(response.body.toString());
@@ -57,11 +55,10 @@ class UserController {
             );
             var jsonResponse2 = jsonDecode(response2.body.toString());
             if (jsonResponse2 != null) {
-              return User(jsonResponse['email'], jsonResponse['password'],
-                  jsonResponse['id']);
             } else {
               return User(null, null, null);
             }
+            return User(element['email'], element['password'], element['id']);
           }
         }
         return User(null, null, null);
