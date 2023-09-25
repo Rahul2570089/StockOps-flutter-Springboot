@@ -12,7 +12,7 @@ class UserController {
         "password": password,
       };
 
-      var response = await http.post(Uri.parse("${url}users/create"),
+      var response = await http.post(Uri.parse("$url/users/create"),
           headers: {"Content-Type": "application/json"},
           body: jsonEncode(user));
       var jsonResponse = jsonDecode(response.body.toString());
@@ -50,7 +50,7 @@ class UserController {
           if (element['email'] == email && element['password'] == password) {
             var response2 = await http.get(
               Uri.parse(
-                  "${url}session/create/${jsonResponse['id']}/${jsonResponse['email']}/${jsonResponse['password']}"),
+                  "$url/session/create/${jsonResponse['id']}/${jsonResponse['email']}/${jsonResponse['password']}"),
               headers: {"Content-Type": "application/json"},
             );
             var jsonResponse2 = jsonDecode(response2.body.toString());

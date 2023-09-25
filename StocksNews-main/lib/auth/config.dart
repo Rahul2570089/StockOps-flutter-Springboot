@@ -1,1 +1,1 @@
-const url = "https://nasty-apples-shop.loca.lt";
+const url = "http://192.168.1.9:8080";
