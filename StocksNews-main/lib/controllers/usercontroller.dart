@@ -40,7 +40,7 @@ class UserController {
   static Future<User> loginUser(String email, String password) async {
     try {
       var response = await http.get(
-        Uri.parse("$url/api/users/allusers"),
+        Uri.parse("$url/users/allusers"),
         headers: {"Content-Type": "application/json"},
       );
       var jsonResponse = jsonDecode(response.body.toString());

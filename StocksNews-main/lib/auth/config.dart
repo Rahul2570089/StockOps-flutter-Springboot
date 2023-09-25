@@ -1,1 +1,1 @@
-const url = "http://192.168.1.9:8080";
+const url = "https://stocks-backend-service.onrender.com/api";
