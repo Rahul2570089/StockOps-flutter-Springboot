@@ -1,14 +1,14 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:newsapp/Stockslist/bse.dart';
 import 'package:newsapp/News/news.dart';
 import 'package:newsapp/Watchlist/BSE_watchlist.dart';
 import 'package:newsapp/auth/createuser_page.dart';
-import 'package:newsapp/controllers/bse_controller.dart';
-import 'package:newsapp/controllers/nse_controller.dart';
-import 'package:newsapp/localdata/sharedpreferences.dart';
+import 'package:newsapp/controllers/stockcontroller.dart';
 import 'package:newsapp/Stockslist/nse.dart';
 import 'package:newsapp/Watchlist/nse_watchlist.dart';
+import 'package:newsapp/payload/data.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -19,43 +19,31 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int selectedindex = 0;
+
   static List<Widget> widgetOptions = [
     const Stocks(),
     const News(),
     const Watchlist(),
   ];
 
-  List<String>? l1, l2, l3, l4;
-  NSEcontroller nsecontroller = Get.put(NSEcontroller());
-  BSEcontroller bsecontroller = Get.put(BSEcontroller());
-
   @override
   void initState() {
     super.initState();
+    StockController.getWatchlist(Payload.user.id!).then((value) => {
+          Payload.watchlist = value,
+          for (var element in value)
+            {
+              if (element.exchange == 'NSE')
+                {Payload.nsewatchlist.add(element)}
+              else
+                {Payload.bsewatchlist.add(element)}
+            }
+        });
 
-    l1 = UserSimplePreferences.getSymbol() ?? [];
-    l2 = UserSimplePreferences.getColor() ?? [];
-    l3 = UserSimplePreferences.getSymbol1() ?? [];
-    l4 = UserSimplePreferences.getColor1() ?? [];
-    for (int i = 0; i < l1!.length; i++) {
-      nsecontroller.m[l1![i]] = l2![i];
-    }
-    for (int i = 0; i < l3!.length; i++) {
-      bsecontroller.m[l3![i]] = l4![i];
-    }
-
-    List<String>? es = UserSimplePreferences.getWatchlistName();
-    List<String>? es2 = UserSimplePreferences.getWatchlistName1();
-    List<String>? es3 = UserSimplePreferences.getWatchlistSymbol();
-    List<String>? es4 = UserSimplePreferences.getWatchlistSymbol1();
-    var e = es ?? [];
-    var e2 = es2 ?? [];
-    var e3 = es3 ?? [];
-    var e4 = es4 ?? [];
-    nsecontroller.n = e.obs;
-    bsecontroller.n = e2.obs;
-    nsecontroller.s = e3.obs;
-    bsecontroller.s = e4.obs;
+    log(Payload.watchlist.toString());
+    log(Payload.nsewatchlist.toString());
+    log(Payload.bsewatchlist.toString());
+    log(Payload.user.id.toString());
   }
 
   @override

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:newsapp/Models/user.dart';
 import 'package:http/http.dart' as http;
 import 'package:newsapp/auth/config.dart';
+import 'package:newsapp/payload/data.dart';
 
 class UserController {
   static Future<User> createUser(String email, String password) async {
@@ -24,6 +25,8 @@ class UserController {
         );
         var jsonResponse2 = jsonDecode(response2.body.toString());
         if (jsonResponse2 != null) {
+          Payload.user = User(jsonResponse['email'], jsonResponse['password'],
+              jsonResponse['id']);
           return User(jsonResponse['email'], jsonResponse['password'],
               jsonResponse['id']);
         } else {
@@ -48,16 +51,17 @@ class UserController {
         List<dynamic> users = jsonResponse;
         for (var element in users) {
           if (element['email'] == email && element['password'] == password) {
-            var response2 = await http.get(
-              Uri.parse(
-                  "$url/session/create/${jsonResponse['id']}/${jsonResponse['email']}/${jsonResponse['password']}"),
-              headers: {"Content-Type": "application/json"},
-            );
-            var jsonResponse2 = jsonDecode(response2.body.toString());
-            if (jsonResponse2 != null) {
-            } else {
-              return User(null, null, null);
-            }
+            // var response2 = await http.get(
+            //   Uri.parse(
+            //       "$url/session/create/${jsonResponse['id']}/${jsonResponse['email']}/${jsonResponse['password']}"),
+            //   headers: {"Content-Type": "application/json"},
+            // );
+            // var jsonResponse2 = jsonDecode(response2.body.toString());
+            // if (jsonResponse2 == null) {
+            //   return User(null, null, null);
+            // }
+            Payload.user =
+                User(element['email'], element['password'], element['id']);
             return User(element['email'], element['password'], element['id']);
           }
         }

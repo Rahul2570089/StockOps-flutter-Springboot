@@ -1,16 +1,13 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:marquee/marquee.dart';
-import 'package:newsapp/controllers/nse_controller.dart';
+import 'package:newsapp/Models/WatchlistStock.dart';
+import 'package:newsapp/Models/stock.dart';
+import 'package:newsapp/controllers/stockcontroller.dart';
+import 'package:newsapp/payload/data.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../Models/article2.dart';
-
-Map<String, String> m = {};
-List<String> showsymbol = [];
-List<String> showcolor = [];
 
 class Stocks extends StatefulWidget {
   const Stocks({Key? key}) : super(key: key);
@@ -20,16 +17,14 @@ class Stocks extends StatefulWidget {
 }
 
 class _StocksState extends State<Stocks> {
-  NSEcontroller nsecontroller = Get.put(NSEcontroller());
-
   List? mapresponse;
   TextEditingController c = TextEditingController();
-  List<Article2> list = [];
-  List<Article2> list2 = [];
+  List<Stock> list = [];
+  List<Stock> list2 = [];
   bool show = false;
   TabController? tabController;
 
-  Future<List<Article2>> apicall() async {
+  Future<List<Stock>> apicall() async {
     http.Response response;
     response = await http.get(
         Uri.parse("https://rahul2570089.github.io/jsonAPI/NSE_stocks.json"));
@@ -38,14 +33,14 @@ class _StocksState extends State<Stocks> {
         setState(() {
           mapresponse = json.decode(response.body);
           var resp = mapresponse as List;
-          list = resp.map((json) => Article2.fromJson(json)).toList();
+          list = resp.map((json) => Stock.fromJsonNSE(json)).toList();
         });
       }
     }
     return list;
   }
 
-  Widget listview(List<Article2> stocks) {
+  Widget listview(List<Stock> stocks) {
     return ListView.builder(
         itemCount: stocks.length,
         itemBuilder: (context, position) {
@@ -60,7 +55,7 @@ class _StocksState extends State<Stocks> {
                       child: Marquee(
                         text: stocks[position].name! == ''
                             ? '  Name Unavailable  '
-                            : "  " + stocks[position].name! + "  ",
+                            : "  ${stocks[position].name!}  ",
                         style: TextStyle(
                             fontWeight: FontWeight.bold,
                             color: stocks[position].name! == ''
@@ -71,39 +66,76 @@ class _StocksState extends State<Stocks> {
                     const SizedBox(
                       width: 10,
                     ),
-                    Obx(
-                      () => IconButton(
-                        icon: Icon(
-                          Icons.star,
-                          color: nsecontroller.m[stocks[position].symbol!] ==
-                                  'true'
-                              ? Colors.yellow
-                              : Colors.grey,
-                        ),
-                        onPressed:
-                            (!nsecontroller.n.contains(stocks[position].name) &&
-                                    !nsecontroller.s
-                                        .contains(stocks[position].symbol))
-                                ? () async {
-                                    setState(() {
-                                      nsecontroller.addToWatchlist(
-                                          stocks, position);
-                                    });
-
-                                    Fluttertoast.showToast(
-                                        msg: "Added to watchlist",
-                                        toastLength: Toast.LENGTH_SHORT);
-                                  }
-                                : () async {
-                                    setState(() {
-                                      nsecontroller.removeFromWatchlist(
-                                          stocks, position);
-                                    });
-                                    Fluttertoast.showToast(
-                                        msg: "Removed from watchlist",
-                                        toastLength: Toast.LENGTH_SHORT);
-                                  },
+                    IconButton(
+                      icon: Icon(
+                        Icons.star,
+                        color: Payload.nsewatchlist.any((element) =>
+                                element.symbol == stocks[position].symbol)
+                            ? Colors.yellow
+                            : Colors.grey,
                       ),
+                      onPressed: Payload.nsewatchlist.isEmpty ||
+                              Payload.nsewatchlist.any((element) =>
+                                  element.symbol != stocks[position].symbol)
+                          ? () async {
+                              setState(() {
+                                StockController.addToWatchlist(
+                                  Payload.user.id!,
+                                  stocks[position].name!,
+                                  stocks[position].symbol!,
+                                  "NSE",
+                                ).then((value) {
+                                  Payload.watchlist.add(
+                                    WatchlistStock(
+                                      name: value.name,
+                                      symbol: value.symbol,
+                                      exchange: "NSE",
+                                      stockId: value.stockId,
+                                      userId: value.userId,
+                                      number: value.number,
+                                    ),
+                                  );
+
+                                  Payload.nsewatchlist.add(WatchlistStock(
+                                    name: value.name,
+                                    symbol: value.symbol,
+                                    exchange: "NSE",
+                                    stockId: value.stockId,
+                                    userId: value.userId,
+                                    number: value.number,
+                                  ));
+                                });
+                              });
+
+                              Fluttertoast.showToast(
+                                  msg: "Added to watchlist",
+                                  toastLength: Toast.LENGTH_SHORT);
+                            }
+                          : () async {
+                              int stockid = -1;
+                              for (var element in Payload.nsewatchlist) {
+                                if (element.symbol == stocks[position].symbol) {
+                                  stockid = element.stockId;
+                                  break;
+                                }
+                              }
+                              if (stockid != -1) {
+                                setState(() {
+                                  StockController.removeFromWatchlist(
+                                    stockid,
+                                  ).then((value) {
+                                    Payload.watchlist.removeWhere((element) =>
+                                        element.stockId == stockid);
+                                    Payload.nsewatchlist.removeWhere(
+                                        (element) =>
+                                            element.stockId == stockid);
+                                  });
+                                });
+                              }
+                              Fluttertoast.showToast(
+                                  msg: "Removed from watchlist",
+                                  toastLength: Toast.LENGTH_SHORT);
+                            },
                     ),
                   ],
                 ),
@@ -157,7 +189,7 @@ class _StocksState extends State<Stocks> {
         ),
         Expanded(
           child: !show
-              ? FutureBuilder<List<Article2>>(
+              ? FutureBuilder<List<Stock>>(
                   future: apicall(),
                   builder: (context, snapshot) {
                     return snapshot.data != null

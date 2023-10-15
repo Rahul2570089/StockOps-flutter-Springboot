@@ -1,13 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:marquee/marquee.dart';
-import 'package:newsapp/Stockslist/bse.dart';
-import 'package:newsapp/controllers/bse_controller.dart';
+import 'package:newsapp/Models/WatchlistStock.dart';
+import 'package:newsapp/payload/data.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-List<String> n1 = [];
-List<String> s1 = [];
-
 
 class BSEWatchlist extends StatefulWidget {
   const BSEWatchlist({Key? key}) : super(key: key);
@@ -17,15 +12,24 @@ class BSEWatchlist extends StatefulWidget {
 }
 
 class _WatchlistState extends State<BSEWatchlist> {
+  List<WatchlistStock> bsewatchlist = [];
 
-  BSEcontroller bsecontroller = Get.put(BSEcontroller());
+  @override
+  void initState() {
+    for (var element in Payload.watchlist) {
+      if (element.exchange == 'BSE') {
+        bsewatchlist.add(element);
+      }
+    }
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: bsecontroller.n.isNotEmpty
+        body: bsewatchlist.isNotEmpty
             ? ListView.builder(
-                itemCount: bsecontroller.n.length,
+                itemCount: bsewatchlist.length,
                 itemBuilder: (context, position) {
                   return Card(
                     child: ListTile(
@@ -33,12 +37,13 @@ class _WatchlistState extends State<BSEWatchlist> {
                         height: 30,
                         width: 90,
                         child: Marquee(
-                          text: bsecontroller.n[position] == ''
+                          text: bsewatchlist[position].name == ''
                               ? '  Name Unavailable  '
-                              : "  " + bsecontroller.n[position] + "  ",
+                              : "  ${bsewatchlist[position].name}  ",
                           style: TextStyle(
                               fontWeight: FontWeight.bold,
-                              color: bsecontroller.n[position] == '  Name Unavailable  '
+                              color: bsewatchlist[position].name ==
+                                      '  Name Unavailable  '
                                   ? Colors.red
                                   : Colors.black),
                         ),
@@ -46,20 +51,14 @@ class _WatchlistState extends State<BSEWatchlist> {
                       leading: Padding(
                           padding: const EdgeInsets.only(right: 120.0),
                           child: Text(
-                            bsecontroller.s[position],
+                            bsewatchlist[position].symbol,
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                             ),
                           )),
                       onTap: () {
-                        int i;
-                        for(i=0; i<m3!.length; i++) {
-                          if(m3![i].symbol == bsecontroller.s[position]) {
-                            break;
-                          }
-                        }
                         launchUrl(Uri.parse(
-                            "https://www.google.com/finance/quote/${m3![i].no}:BOM"));
+                            "https://www.google.com/finance/quote/${bsewatchlist[position].number}:BOM"));
                       },
                     ),
                   );
